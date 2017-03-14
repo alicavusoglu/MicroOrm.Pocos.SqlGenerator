@@ -43,6 +43,9 @@ namespace MicroOrm.Pocos.SqlGenerator
             //Filter key properties
             this.KeyProperties = props.Where(p => p.GetCustomAttributes<KeyProperty>().Any()).Select(p => new PropertyMetadata(p));
 
+            //Filter no update properties
+            this.NoUpdateProperties = props.Where(p => p.GetCustomAttributes<NoUpdate>().Any()).Select(p => new PropertyMetadata(p));
+
             //Use identity as key pattern
             var identityProperty = props.SingleOrDefault(p => p.GetCustomAttributes<KeyProperty>().Any(k => k.Identity));
             this.IdentityProperty = identityProperty != null ? new PropertyMetadata(identityProperty) : null ;
@@ -127,6 +130,8 @@ namespace MicroOrm.Pocos.SqlGenerator
         /// </summary>
         public object LogicalDeleteValue { get; private set; }
 
+        public IEnumerable<PropertyMetadata> NoUpdateProperties { get; private set; }
+
         #endregion
 
         #region Query generators
@@ -171,6 +176,7 @@ namespace MicroOrm.Pocos.SqlGenerator
         public virtual string GetUpdate()
         {
             var properties = this.BaseProperties.Where(p => !this.KeyProperties.Any(k => k.Name.Equals(p.Name, StringComparison.InvariantCultureIgnoreCase)));
+            properties = this.BaseProperties.Where(p => !this.NoUpdateProperties.Any(k => k.Name.Equals(p.Name, StringComparison.InvariantCultureIgnoreCase)));
 
             var sqlBuilder = new StringBuilder();
             sqlBuilder.AppendFormat("UPDATE [{0}].[{1}] SET {2} WHERE {3}",

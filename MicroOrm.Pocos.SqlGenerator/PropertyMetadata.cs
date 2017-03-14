@@ -31,7 +31,7 @@ namespace MicroOrm.Pocos.SqlGenerator
         /// </summary>
         public string Name
         {
-            get 
+            get
             {
                 return this.PropertyInfo.Name;
             }
